@@ -25,8 +25,6 @@ bool init_window_renderer(SDL_Window **window,
                           int width, int heigth);
 
 
-int render(void *render_data);
-
 int render_screen_frame(screen_t screen, SDL_Renderer *renderer);
 
 typedef struct render_data {

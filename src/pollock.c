@@ -5,16 +5,19 @@
 #include <SDL2/SDL.h>
 #include <math.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "render.h"
+#include "pollock.h"
 
-const int WIDTH = 1024;
-const int HEIGTH = 768;
+const int WIDTH = 256;
+const int HEIGTH = 256;
 
+volatile bool keep_rendering = true;
+volatile bool render_next = false;
 
 int main(int argc, char **argv)
 {
-
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "SDL init error %s", SDL_GetError());
         return EXIT_FAILURE;
@@ -38,19 +41,20 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    srand(time(NULL));
+    thrd_t thrd;
+    thrd_create(&thrd, get_random_screen, &screen);
 
-    for (int i = 0; i < WIDTH; ++i) {
-        for (int j = 0; j < HEIGTH; ++j) {
-            pixel_t pixel = {.r = rand() % 256, .g = rand() % 256, .b = rand() % 256};
-            screen.pixels[i][j] = pixel;
+    render_data_t render_data = {.renderer = renderer, .screen = screen};
+
+    //main rendering loop
+    while (keep_rendering) {
+        if (render_next) {
+            render_screen_frame(screen, renderer);
+            render_next = false;
         }
     }
 
-    render_data_t render_data = {.renderer = renderer, .screen = screen};
-    render(&render_data);
-
-    // SDL_Delay(5000);
+    thrd_join(thrd, NULL);
 
     destroy_screen(&screen);
     SDL_Quit();
@@ -58,4 +62,21 @@ int main(int argc, char **argv)
     SDL_DestroyRenderer(renderer);
 
     return EXIT_SUCCESS;
+}
+
+int get_random_screen(void *screen_data) {
+    screen_t *screen = (screen_t *) screen_data;
+    srand(time(NULL));
+
+    for (int n = 0; n < 1000; ++n) {
+        for (int i = 0; i < screen->width; ++i) {
+            for (int j = 0; j < screen->height; ++j) {
+                pixel_t pixel = {.r = rand() % 256, .g = rand() % 256, .b = rand() % 256};
+                screen->pixels[i][j] = pixel;
+            }
+        }
+        render_next = true;
+    }
+
+    keep_rendering = false;
 }

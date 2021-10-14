@@ -2,15 +2,29 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "pollock.h"
 #include "render.h"
+
+#define SEC_TO_MS(sec) ((sec)*1000)
+#define NS_TO_MS(ns) ((ns)/1000000)
+
+unsigned long long last_frame_time = 0;
+
+static unsigned long long millis()
+{
+    struct timespec ts;
+    timespec_get(&ts, TIME_UTC);
+    uint64_t ms = SEC_TO_MS((uint64_t)ts.tv_sec) + NS_TO_MS((uint64_t)ts.tv_nsec);
+    return ms;
+}
 
 bool init_window_renderer(SDL_Window **window,
                           SDL_Renderer **renderer,
                           int width, int heigth) 
 {
-    SDL_Window *tmp_window = SDL_CreateWindow("douady", SDL_WINDOWPOS_UNDEFINED,
+    SDL_Window *tmp_window = SDL_CreateWindow("pollock", SDL_WINDOWPOS_UNDEFINED,
                                           SDL_WINDOWPOS_UNDEFINED, width, heigth,
                                           SDL_WINDOW_SHOWN);
     if (tmp_window == NULL) {
@@ -63,16 +77,8 @@ void destroy_screen(screen_t *screen) {
 }
 
 
-int render(void *render_data) {
-    render_data_t *rendering_data = (render_data_t*) render_data;
-    for (int i = 0; i < 100; ++i) {
-        render_screen_frame(rendering_data->screen, rendering_data->renderer);
-    }
-    return 0;
-}
-
-
 int render_screen_frame(screen_t screen, SDL_Renderer *renderer) {
+    unsigned long long now = millis();
     for (unsigned x = 0; x < screen.width; ++x) {
         for (unsigned y = 0; y < screen.height; ++y) {
             pixel_t *pixel = &screen.pixels[x][y];
@@ -81,5 +87,6 @@ int render_screen_frame(screen_t screen, SDL_Renderer *renderer) {
         }
     }
     SDL_RenderPresent(renderer);
+    printf("%.0lf FPS\n", ((float)1 / (millis() - now)) * 1000);
     return 0;
 }
