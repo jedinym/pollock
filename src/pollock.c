@@ -10,11 +10,27 @@
 #include "render.h"
 #include "pollock.h"
 
-const int WIDTH = 256;
-const int HEIGTH = 256;
+const int WIDTH = 800;
+const int HEIGTH = 600;
 
 volatile bool keep_rendering = true;
 volatile bool render_next = false;
+
+
+static int get_random_screen(void *screen_data) {
+    screen_t *screen = (screen_t *) screen_data;
+    srand(time(NULL));
+
+    for (int x = 0; x < screen->width; ++x) {
+        for (int y = 0; y < screen->height; ++y) {
+            pixel_t pixel = {(x*y) % 256, (x*y) % 256, (x*y) % 256};
+            screen->pixels[x][y] = pixel;
+        }
+    }
+
+    return 0;
+}
+
 
 int main(int argc, char **argv)
 {
@@ -30,9 +46,6 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    pixel_t test_pixel = {.r = 38, .g = 226, .b = 255};
-    pixel_t bad_pixel = {.r = 200, .g = 50, .b = 0};
-
     screen_t screen;
     if (!create_screen(&screen, WIDTH, HEIGTH)) {
         SDL_DestroyRenderer(renderer);
@@ -41,20 +54,23 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    thrd_t thrd;
-    thrd_create(&thrd, get_random_screen, &screen);
-
-    render_data_t render_data = {.renderer = renderer, .screen = screen};
-
     //main rendering loop
     while (keep_rendering) {
-        if (render_next) {
-            render_screen_frame(screen, renderer);
-            render_next = false;
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                keep_rendering = false;
+            }
         }
+
+        thrd_t thrd;
+        thrd_create(&thrd, get_random_screen, &screen);
+
+        render_screen_frame(screen, renderer);
+
+        thrd_join(thrd, NULL);
     }
 
-    thrd_join(thrd, NULL);
 
     destroy_screen(&screen);
     SDL_Quit();
@@ -64,19 +80,3 @@ int main(int argc, char **argv)
     return EXIT_SUCCESS;
 }
 
-int get_random_screen(void *screen_data) {
-    screen_t *screen = (screen_t *) screen_data;
-    srand(time(NULL));
-
-    for (int n = 0; n < 1000; ++n) {
-        for (int i = 0; i < screen->width; ++i) {
-            for (int j = 0; j < screen->height; ++j) {
-                pixel_t pixel = {.r = rand() % 256, .g = rand() % 256, .b = rand() % 256};
-                screen->pixels[i][j] = pixel;
-            }
-        }
-        render_next = true;
-    }
-
-    keep_rendering = false;
-}
