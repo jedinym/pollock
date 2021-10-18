@@ -6,7 +6,7 @@
 #include "render.hpp"
 #include "pollock.hpp"
 
-const int WIDTH = 800;
+const int WIDTH = 600;
 const int HEIGTH = 600;
 
 volatile bool keep_rendering = true;
@@ -27,10 +27,13 @@ int main(int argc, char **argv)
     }
 
     Screen screen (WIDTH, HEIGTH);
-    Pixel pix(100, 250, 50);
 
-    for (int i = 0; i < WIDTH; ++i) {
-        for (int j = 0; i < HEIGTH; ++j) {
+    // zima blue
+    Pixel pix(94, 223, 255);
+
+    for (int x = 0; x < WIDTH; ++x) {
+        for (int y = 0; y < HEIGTH; ++y) {
+            screen.set_pixel(x, y, pix);
         }
     }
 

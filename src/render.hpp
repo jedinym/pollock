@@ -20,7 +20,7 @@ class Screen {
     Pixel **pixels;
 public:
     Screen(unsigned _width, unsigned _height);
-    ~Screen();
+//    ~Screen();
     unsigned get_width();
     unsigned get_height();
     Pixel *get_pixel(unsigned x, unsigned y);
