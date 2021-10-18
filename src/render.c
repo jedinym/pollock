@@ -43,14 +43,14 @@ bool init_window_renderer(SDL_Window **window,
 }
 
 bool create_screen(screen_t *screen, unsigned width, unsigned height) {
-    pixel_t **pixels = malloc(width * sizeof(pixel_t*));
+    pixel_t **pixels = calloc(width, sizeof(pixel_t*));
     if (pixels == NULL) {
         perror("malloc error");
         return false;
     }
 
     for (int i = 0; i < width; ++i) {
-        pixels[i] = malloc(height * sizeof(pixel_t));
+        pixels[i] = calloc(height, sizeof(pixel_t));
         if (pixels[i] == NULL) {
             perror("malloc error");
             for (int j = 0; j < i; ++j) {
