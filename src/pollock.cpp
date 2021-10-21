@@ -1,7 +1,6 @@
 #include <stdio.h>
-#include <SDL2/SDL.h>
-#include <time.h>
 #include <iostream>
+#include <SDL2/SDL.h>
 
 #include "render.hpp"
 #include "pollock.hpp"

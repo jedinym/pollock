@@ -36,12 +36,12 @@ Screen::Screen(unsigned _width, unsigned _height) {
     }
 }
 
-// Screen::~Screen() {
-//     for (int i = 0; i < width; ++i) {
-//         delete pixels[i];
-//     }
-//     delete[] pixels;
-// }
+Screen::~Screen() {
+    for (int i = 0; i < width; ++i) {
+        delete[] pixels[i];
+    }
+    delete[] pixels;
+}
 
 unsigned Screen::get_width() {
     return width;

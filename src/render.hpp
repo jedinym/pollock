@@ -20,28 +20,12 @@ class Screen {
     Pixel **pixels;
 public:
     Screen(unsigned _width, unsigned _height);
-//    ~Screen();
+    ~Screen();
     unsigned get_width();
     unsigned get_height();
     Pixel *get_pixel(unsigned x, unsigned y);
     void set_pixel(unsigned x, unsigned y, Pixel pixel);
 };
-
-// typedef struct pixel {
-//     unsigned short r;
-//     unsigned short g;
-//     unsigned short b;
-// } pixel_t;
-
-
-// typedef struct screen {
-//     pixel_t **pixels;
-//     unsigned width;
-//     unsigned height;
-// } screen_t;
-
-// bool create_screen(screen_t *screen, unsigned width, unsigned height);
-// void destroy_screen(screen_t *screen);
 
 bool init_window_renderer(SDL_Window **window,
                           SDL_Renderer **renderer,
